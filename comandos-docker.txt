@@ -1,0 +1,12 @@
+# Criar a rede
+docker network create library-network
+
+# Rodar container Postgres na versao 16.3 e adiciona-lo na rede network-library
+docker run --name librarydb -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=library --network library-network  postgres:16.3
+
+# Rodar container pgadmin4 na ultima versao e adiciona-lo na rede network-library
+docker run --name pgadmin4 -p 15432:80 -e PGADMIN_DEFAULT_EMAIL=admin@admin.com -e PGADMIN_DEFAULT_PASSWORD=admin --network library-network dpage/pgadmin4
+
+# Reiniciar containers (apos desligar a maquina)
+docker start pgadmin4
+docker start librarydb
