@@ -1,6 +1,8 @@
 package io.github.joao_tinelli.libraryapi.controller;
 
 import io.github.joao_tinelli.libraryapi.controller.dto.AutorDTO;
+import io.github.joao_tinelli.libraryapi.controller.dto.ErroResposta;
+import io.github.joao_tinelli.libraryapi.exception.RegistroDuplicadoException;
 import io.github.joao_tinelli.libraryapi.model.Autor;
 import io.github.joao_tinelli.libraryapi.service.AutorService;
 import org.springframework.http.ResponseEntity;
@@ -24,21 +26,27 @@ public class AutorController {
     }
 
     @PostMapping // Metodo: POST
-    public ResponseEntity<Void> salvar(@RequestBody AutorDTO autor){ // @RequestBody: essa annotation indica que esse objeto (autor) vai vir no body
+    public ResponseEntity<Object> salvar(@RequestBody AutorDTO autor){ // @RequestBody: essa annotation indica que esse objeto (autor) vai vir no body
 
-        var autorEntidade = autor.mapearParaAutor();
-        service.salvar(autorEntidade); // Salvando no banco de dados
+        try {
+            var autorEntidade = autor.mapearParaAutor();
+            service.salvar(autorEntidade); // Salvando no banco de dados
 
-        // Pega a URI da request atual para retornar uma URI do tipo: http://localhost:8080/autores/id
-        // Conforme exigido pelo contrato da API
-        URI location = ServletUriComponentsBuilder.
-                fromCurrentRequest().
-                path("/{id}").
-                buildAndExpand(autorEntidade.getId()).
-                toUri();
+            // Pega a URI da request atual para retornar uma URI do tipo: http://localhost:8080/autores/id
+            // Conforme exigido pelo contrato da API
+            URI location = ServletUriComponentsBuilder.
+                    fromCurrentRequest().
+                    path("/{id}").
+                    buildAndExpand(autorEntidade.getId()).
+                    toUri();
 
-        // ResponseEntity: classe que representa um objeto response
-        return ResponseEntity.created(location).build();
+            // ResponseEntity: classe que representa um objeto response
+            return ResponseEntity.created(location).build();
+
+        } catch (RegistroDuplicadoException rde){
+            var erroDTO = ErroResposta.conflito(rde.getMessage());
+            return ResponseEntity.status(erroDTO.status()).body(erroDTO);
+        }
     }
 
     @GetMapping("{id}")
@@ -87,22 +95,27 @@ public class AutorController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Void> atualizar(
-            @PathVariable("id") String id, @RequestBody AutorDTO dto){
+    public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody AutorDTO dto) throws RegistroDuplicadoException {
 
-        var idAutor = UUID.fromString(id);
-        Optional<Autor> autorOptional = service.obterPorId(idAutor);
+        try {
+            var idAutor = UUID.fromString(id);
+            Optional<Autor> autorOptional = service.obterPorId(idAutor);
 
-        if (autorOptional.isEmpty()){
-            return ResponseEntity.notFound().build();
+            if (autorOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            var autor = autorOptional.get();
+            autor.setNome(dto.nome());
+            autor.setNacionalidade(dto.nacionalidade());
+            autor.setDataNascimento(dto.dataNascimento());
+
+            service.atualizar(autor);
+            return ResponseEntity.noContent().build();
+
+        } catch (RegistroDuplicadoException rde){
+            var erroDTO = ErroResposta.conflito(rde.getMessage());
+            return ResponseEntity.status(erroDTO.status()).body(erroDTO);
         }
-
-        var autor = autorOptional.get();
-        autor.setNome(dto.nome());
-        autor.setNacionalidade(dto.nacionalidade());
-        autor.setDataNascimento(dto.dataNascimento());
-
-        service.atualizar(autor);
-        return ResponseEntity.noContent().build();
     }
 }
