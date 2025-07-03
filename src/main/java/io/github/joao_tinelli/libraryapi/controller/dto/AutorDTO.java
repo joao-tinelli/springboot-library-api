@@ -1,6 +1,8 @@
 package io.github.joao_tinelli.libraryapi.controller.dto;
 
 import io.github.joao_tinelli.libraryapi.model.Autor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -10,7 +12,15 @@ import java.util.UUID;
 // Mas como a entidade Autor tem mais atributos, deve-se criar o record AutorDTO
 // AutorDTO é uma camada representacional, ou seja, só serve pra representar um json
 public record AutorDTO(
-        UUID id, String nome, LocalDate dataNascimento, String nacionalidade) {
+        UUID id,
+        @NotBlank(message = "campo obrigatório")
+        String nome,
+        @NotNull(message = "campo obrigatório")
+        LocalDate dataNascimento,
+        @NotBlank(message = "campo obrigatório")
+        String nacionalidade
+)
+{
 
     public Autor mapearParaAutor(){
         Autor autor = new Autor();

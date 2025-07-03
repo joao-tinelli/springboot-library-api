@@ -6,6 +6,7 @@ import io.github.joao_tinelli.libraryapi.exception.OperacaoNaoPermitidaException
 import io.github.joao_tinelli.libraryapi.exception.RegistroDuplicadoException;
 import io.github.joao_tinelli.libraryapi.model.Autor;
 import io.github.joao_tinelli.libraryapi.service.AutorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class AutorController {
     private final AutorService service;
 
     @PostMapping // Metodo: POST
-    public ResponseEntity<Object> salvar(@RequestBody AutorDTO autor){ // @RequestBody: essa annotation indica que esse objeto (autor) vai vir no body
+    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO autor){ // @RequestBody: essa annotation indica que esse objeto (autor) vai vir no body
 
         try {
             var autorEntidade = autor.mapearParaAutor();
@@ -102,7 +103,7 @@ public class AutorController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody AutorDTO dto) throws RegistroDuplicadoException {
+    public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) throws RegistroDuplicadoException {
 
         try {
             var idAutor = UUID.fromString(id);
