@@ -2,6 +2,7 @@ package io.github.joao_tinelli.libraryapi.controller;
 
 import io.github.joao_tinelli.libraryapi.controller.dto.AutorDTO;
 import io.github.joao_tinelli.libraryapi.controller.dto.ErroResposta;
+import io.github.joao_tinelli.libraryapi.controller.mappers.AutorMapper;
 import io.github.joao_tinelli.libraryapi.exception.OperacaoNaoPermitidaException;
 import io.github.joao_tinelli.libraryapi.exception.RegistroDuplicadoException;
 import io.github.joao_tinelli.libraryapi.model.Autor;
@@ -25,12 +26,13 @@ public class AutorController {
 
     // Injecao de dependencia
     private final AutorService service;
+    private final AutorMapper mapper;
 
     @PostMapping // Metodo: POST
-    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO autor){ // @RequestBody: essa annotation indica que esse objeto (autor) vai vir no body
+    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto){ // @RequestBody: essa annotation indica que esse objeto (dto) vai vir no body
 
         try {
-            var autorEntidade = autor.mapearParaAutor();
+            Autor autorEntidade = mapper.toEntity(dto); // <---
             service.salvar(autorEntidade); // Salvando no banco de dados
 
             // Pega a URI da request atual para retornar uma URI do tipo: http://localhost:8080/autores/id
@@ -57,7 +59,7 @@ public class AutorController {
 
         if (autorOptional.isPresent()){
             Autor autor = autorOptional.get();
-            AutorDTO dto = new AutorDTO(autor.getId(), autor.getNome(), autor.getDataNascimento(), autor.getNacionalidade());
+            AutorDTO dto = mapper.toDTO(autor); // <----
 
             return ResponseEntity.ok(dto);
         }

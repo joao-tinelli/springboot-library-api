@@ -25,6 +25,7 @@ public class TransacaoService {
     @Transactional
     public void atualizacaoSemAtualizar(){
         var livro = livroRepository.findById(UUID.fromString("d05d3f25-6cdd-4c4a-81fc-5ab8ba337a99")).orElse(null);
+        assert livro != null;
         livro.setDataPublicacao(LocalDate.of(2024, 12, 18));
         // livroRepository.save(livro) eh desnecessário, pois o commit dentro de uma transaction eh automatico
     }
