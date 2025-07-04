@@ -2,14 +2,19 @@ package io.github.joao_tinelli.libraryapi.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "livro")
 @Data // ja inclui @Getter @Setter @ToString @RequiredArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Livro {
 
     // id uuid not null primary key
@@ -43,4 +48,20 @@ public class Livro {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_autor")
     private Autor autor;
+
+    // data_cadastro timestamp
+    @CreatedDate
+    // Spring Data JPA vai preencher com a data de criacao para mim (necessario: @EnableJpaAuditing em Application e @EntityListeners(AuditingEntityListener.class) aqui)
+    @Column(name = "data_cadastro")
+    private LocalDateTime dataCadastro;
+
+    // data_atualizacao timestamp
+    @LastModifiedDate
+    // Spring Data JPA vai preencher com a ultima data para mim (necessario: @EnableJpaAuditing em Application e @EntityListeners(AuditingEntityListener.class) aqui)
+    @Column(name = "data_atualizacao")
+    private LocalDateTime dataAtualizacao;
+
+    // id_usuario uuid
+    @Column(name = "id_usuario")
+    private UUID idUsuario;
 }
