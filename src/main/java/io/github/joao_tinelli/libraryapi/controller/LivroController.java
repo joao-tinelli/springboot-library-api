@@ -4,7 +4,9 @@ import io.github.joao_tinelli.libraryapi.controller.dto.CadastroLivroDTO;
 import io.github.joao_tinelli.libraryapi.controller.dto.ErroResposta;
 import io.github.joao_tinelli.libraryapi.controller.dto.ResultadoPesquisaLivroDTO;
 import io.github.joao_tinelli.libraryapi.controller.mappers.LivroMapper;
+import io.github.joao_tinelli.libraryapi.exception.OperacaoNaoPermitidaException;
 import io.github.joao_tinelli.libraryapi.exception.RegistroDuplicadoException;
+import io.github.joao_tinelli.libraryapi.model.Autor;
 import io.github.joao_tinelli.libraryapi.model.Livro;
 import io.github.joao_tinelli.libraryapi.service.LivroService;
 import jakarta.validation.Valid;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -43,5 +46,18 @@ public class LivroController implements GenericController{
                     var dto = mapper.toDTO(livro);
                     return ResponseEntity.ok(dto);
                 }).orElseGet( () -> ResponseEntity.notFound().build() );
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<ErroResposta> excluir(@PathVariable("id") String id){
+        var idLivro = UUID.fromString(id);
+        Optional<Livro> livroOptional = service.obterPorId(idLivro);
+
+        if (livroOptional.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        service.deletar(livroOptional.get());
+        return ResponseEntity.noContent().build();
     }
 }

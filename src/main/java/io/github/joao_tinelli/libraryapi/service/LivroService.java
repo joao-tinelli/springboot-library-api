@@ -1,5 +1,7 @@
 package io.github.joao_tinelli.libraryapi.service;
 
+import io.github.joao_tinelli.libraryapi.exception.OperacaoNaoPermitidaException;
+import io.github.joao_tinelli.libraryapi.model.Autor;
 import io.github.joao_tinelli.libraryapi.model.Livro;
 import io.github.joao_tinelli.libraryapi.repository.LivroRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,5 +21,9 @@ public class LivroService {
 
     public Optional<Livro> obterPorId(UUID id){
         return livroRepository.findById(id);
+    }
+
+    public void deletar(Livro livro) {
+        livroRepository.delete(livro);
     }
 }
