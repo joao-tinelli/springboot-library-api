@@ -4,6 +4,7 @@ import io.github.joao_tinelli.libraryapi.model.Autor;
 import io.github.joao_tinelli.libraryapi.model.GeneroLivro;
 import io.github.joao_tinelli.libraryapi.model.Livro;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public interface LivroRepository extends JpaRepository<Livro, UUID> {
+public interface LivroRepository extends JpaRepository<Livro, UUID> , JpaSpecificationExecutor<Livro> {
 
     // select * from livro where id_autor = 'id' (Spring Data JPA vai fazer o mapeamento para mim)
     List<Livro> findByAutor(Autor autor);
