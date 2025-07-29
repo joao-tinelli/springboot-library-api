@@ -58,4 +58,11 @@ public class LivroService {
 
         return livroRepository.findAll(specs);
     }
+
+    public void atualizar(Livro livro) throws IllegalArgumentException {
+        if (livro.getId() == null){
+            throw new IllegalArgumentException("Livro nao encontrado");
+        }
+        livroRepository.save(livro);
+    }
 }
