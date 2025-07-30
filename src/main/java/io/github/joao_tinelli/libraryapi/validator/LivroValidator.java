@@ -1,5 +1,6 @@
 package io.github.joao_tinelli.libraryapi.validator;
 
+import io.github.joao_tinelli.libraryapi.exception.CampoInvalidoException;
 import io.github.joao_tinelli.libraryapi.exception.RegistroDuplicadoException;
 import io.github.joao_tinelli.libraryapi.model.Livro;
 import io.github.joao_tinelli.libraryapi.repository.LivroRepository;
@@ -13,11 +14,21 @@ import java.util.Optional;
 public class LivroValidator {
 
     private final LivroRepository repository;
+    private static final int ANO_EXIGENCIA_PRECO = 2020;
 
     public void validar(Livro livro) throws RegistroDuplicadoException{
         if (existeLivroIsbn(livro)){
             throw new RegistroDuplicadoException("ISBN ja cadastrado");
         }
+
+        if (isPrecoObrigatorioNulo(livro)){
+            throw new CampoInvalidoException("Preco", "Para livros com ano de pubicacao a partir de 2020, o preco é obrigatório");
+        }
+    }
+
+    private boolean isPrecoObrigatorioNulo(Livro livro) {
+        return livro.getPreco() == null &&
+                livro.getDataPublicacao().getYear() >= ANO_EXIGENCIA_PRECO;
     }
 
     private boolean existeLivroIsbn(Livro livro){
