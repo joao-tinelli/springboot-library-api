@@ -9,8 +9,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface LivroRepository extends JpaRepository<Livro, UUID> , JpaSpecificationExecutor<Livro> {
@@ -22,7 +24,7 @@ public interface LivroRepository extends JpaRepository<Livro, UUID> , JpaSpecifi
     @Query("SELECT l FROM Livro l JOIN FETCH l.autor WHERE l.titulo = :titulo")
     List<Livro> findByTitulo(@Param("titulo") String titulo);
 
-    List<Livro> findByIsbn(@Param("isbn") String isbn);
+    Optional<Livro> findByIsbn(@Param("isbn") String isbn);
 
     // select * from livro where dataPublicacao between ? and ?
     List<Livro> findByDataPublicacaoBetween(LocalDate inicio, LocalDate fim);

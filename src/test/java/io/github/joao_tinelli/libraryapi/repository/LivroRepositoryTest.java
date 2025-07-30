@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @SpringBootTest
@@ -91,13 +92,6 @@ class LivroRepositoryTest {
         System.out.println(livro.getAutor().getNome());
     }
 
-
-    @Test
-    @Transactional
-    void pesquisarPorIsbnTest(){
-        List<Livro> lista = repository.findByIsbn("54321");
-        lista.forEach(System.out::println);
-    }
 
     @Test
     @Transactional

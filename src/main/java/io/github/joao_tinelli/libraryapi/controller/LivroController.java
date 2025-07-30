@@ -29,7 +29,7 @@ public class LivroController implements GenericController{
     private final LivroMapper mapper;
 
     @PostMapping
-    public ResponseEntity<Void> salvar(@RequestBody @Valid CadastroLivroDTO dto){
+    public ResponseEntity<Void> salvar(@RequestBody @Valid CadastroLivroDTO dto) throws RegistroDuplicadoException {
         // mapear DTO para entidade
         Livro livro = mapper.toEntity(dto);
 
@@ -91,7 +91,11 @@ public class LivroController implements GenericController{
                     livro.setAutor(entidadeAux.getAutor());
                     livro.setTitulo(entidadeAux.getTitulo());
 
-                    service.atualizar(livro);
+                    try {
+                        service.atualizar(livro);
+                    } catch (RegistroDuplicadoException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     // Isso retorna ResponseEntity<Void>, que é compatível com ResponseEntity<?>
                     return ResponseEntity.noContent().build();

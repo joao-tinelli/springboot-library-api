@@ -1,11 +1,13 @@
 package io.github.joao_tinelli.libraryapi.service;
 
 import io.github.joao_tinelli.libraryapi.exception.OperacaoNaoPermitidaException;
+import io.github.joao_tinelli.libraryapi.exception.RegistroDuplicadoException;
 import io.github.joao_tinelli.libraryapi.model.Autor;
 import io.github.joao_tinelli.libraryapi.model.GeneroLivro;
 import io.github.joao_tinelli.libraryapi.model.Livro;
 import io.github.joao_tinelli.libraryapi.repository.LivroRepository;
 import io.github.joao_tinelli.libraryapi.repository.specs.LivroSpecs;
+import io.github.joao_tinelli.libraryapi.validator.LivroValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -18,8 +20,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LivroService {
     private final LivroRepository livroRepository;
+    private final LivroValidator validator;
 
-    public Livro salvar(Livro livro) {
+    public Livro salvar(Livro livro) throws RegistroDuplicadoException {
+        validator.validar(livro);
         return livroRepository.save(livro);
     }
 
@@ -59,10 +63,11 @@ public class LivroService {
         return livroRepository.findAll(specs);
     }
 
-    public void atualizar(Livro livro) throws IllegalArgumentException {
+    public void atualizar(Livro livro) throws IllegalArgumentException, RegistroDuplicadoException {
         if (livro.getId() == null){
             throw new IllegalArgumentException("Livro nao encontrado");
         }
+        validator.validar(livro);
         livroRepository.save(livro);
     }
 }
