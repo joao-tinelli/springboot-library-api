@@ -9,9 +9,12 @@ import io.github.joao_tinelli.libraryapi.repository.LivroRepository;
 import io.github.joao_tinelli.libraryapi.repository.specs.LivroSpecs;
 import io.github.joao_tinelli.libraryapi.validator.LivroValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,7 +38,7 @@ public class LivroService {
         livroRepository.delete(livro);
     }
 
-    public List<Livro> pesquisa(String isbn, String titulo, String nomeAutor, GeneroLivro genero, Integer anoPublicacao){
+    public Page<Livro> pesquisa(String isbn, String titulo, String nomeAutor, GeneroLivro genero, Integer anoPublicacao, Integer pagina, Integer tamanhoPagina){
 
         // select * from livro where 0 = 0
         Specification<Livro> specs = Specification.where((root, query, cb) -> cb.conjunction());
@@ -60,7 +63,8 @@ public class LivroService {
             specs = specs.and(LivroSpecs.anoPublicacaoEqual(anoPublicacao));
         }
 
-        return livroRepository.findAll(specs);
+        Pageable pageRequest = PageRequest.of(pagina, tamanhoPagina);
+        return livroRepository.findAll(specs, pageRequest);
     }
 
     public void atualizar(Livro livro) throws IllegalArgumentException, RegistroDuplicadoException {
