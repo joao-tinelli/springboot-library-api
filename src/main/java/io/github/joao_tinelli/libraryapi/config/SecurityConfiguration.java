@@ -28,7 +28,8 @@ public class SecurityConfiguration {
                     configurer.loginPage("/login").permitAll();
                 })
                 .authorizeHttpRequests(authorize -> {
-                    authorize.requestMatchers("/login").permitAll();
+                    authorize.requestMatchers("/login/**").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/usuarios/**").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/autores/**").hasRole("ADMIN"); // apenas ADMINs podem salvar um autor
                     authorize.requestMatchers(HttpMethod.DELETE, "/autores/**").hasRole("ADMIN"); // apenas ADMINs podem deletar um autor
                     authorize.requestMatchers(HttpMethod.PUT, "/autores/**").hasRole("ADMIN"); // apenas ADMINs podem atualizar um autor
