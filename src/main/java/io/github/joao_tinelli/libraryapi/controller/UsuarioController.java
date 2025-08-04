@@ -6,6 +6,7 @@ import io.github.joao_tinelli.libraryapi.controller.mappers.UsuarioMapper;
 import io.github.joao_tinelli.libraryapi.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,5 +22,4 @@ public class UsuarioController {
         var usuario = mapper.toEntity(dto);
         service.salvar(usuario);
     }
-
 }
