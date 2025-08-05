@@ -7,12 +7,16 @@ import io.github.joao_tinelli.libraryapi.controller.mappers.LivroMapper;
 import io.github.joao_tinelli.libraryapi.exception.RegistroDuplicadoException;
 import io.github.joao_tinelli.libraryapi.model.GeneroLivro;
 import io.github.joao_tinelli.libraryapi.model.Livro;
+import io.github.joao_tinelli.libraryapi.model.Usuario;
 import io.github.joao_tinelli.libraryapi.service.LivroService;
+import io.github.joao_tinelli.libraryapi.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -24,12 +28,17 @@ import java.util.UUID;
 public class LivroController implements GenericController{
     private final LivroService service;
     private final LivroMapper mapper;
+    private final UsuarioService usuarioService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
-    public ResponseEntity<Void> salvar(@RequestBody @Valid CadastroLivroDTO dto) throws RegistroDuplicadoException {
+    public ResponseEntity<Void> salvar(@RequestBody @Valid CadastroLivroDTO dto, Authentication authentication) throws RegistroDuplicadoException {
         // mapear DTO para entidade
         Livro livro = mapper.toEntity(dto);
+
+        UserDetails usuarioLogado = (UserDetails) authentication.getPrincipal();
+        Usuario usuario = usuarioService.obterPorLogin(usuarioLogado.getUsername());
+        livro.setIdUsuario(usuario.getId());
 
         // enviar a entidade para o service validar e salvar na base
         service.salvar(livro);

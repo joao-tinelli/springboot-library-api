@@ -6,11 +6,15 @@ import io.github.joao_tinelli.libraryapi.controller.mappers.AutorMapper;
 import io.github.joao_tinelli.libraryapi.exception.OperacaoNaoPermitidaException;
 import io.github.joao_tinelli.libraryapi.exception.RegistroDuplicadoException;
 import io.github.joao_tinelli.libraryapi.model.Autor;
+import io.github.joao_tinelli.libraryapi.model.Usuario;
 import io.github.joao_tinelli.libraryapi.service.AutorService;
+import io.github.joao_tinelli.libraryapi.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -28,12 +32,17 @@ public class AutorController implements GenericController {
     // Injecao de dependencia
     private final AutorService service;
     private final AutorMapper mapper;
+    private final UsuarioService usuarioService;
 
     @PostMapping // Metodo: POST
     @PreAuthorize("hasAnyRole('GERENTE')")
-    public ResponseEntity<Void> salvar(@RequestBody @Valid AutorDTO dto) throws RegistroDuplicadoException { // @RequestBody: essa annotation indica que esse objeto (dto) vai vir no body
+    public ResponseEntity<Void> salvar(@RequestBody @Valid AutorDTO dto, Authentication authentication) throws RegistroDuplicadoException { // @RequestBody: essa annotation indica que esse objeto (dto) vai vir no body
+
+        UserDetails usuarioLogado = (UserDetails) authentication.getPrincipal();
+        Usuario usuario = usuarioService.obterPorLogin(usuarioLogado.getUsername());
 
         Autor autorEntidade = mapper.toEntity(dto); // <---
+        autorEntidade.setIdUsuario(usuario.getId());
         service.salvar(autorEntidade); // Salvando no banco de dados
 
         // Pega a URI da request atual para retornar uma URI do tipo: http://localhost:8080/autores/id
