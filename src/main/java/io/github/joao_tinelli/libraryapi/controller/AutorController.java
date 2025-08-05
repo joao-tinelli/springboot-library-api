@@ -10,6 +10,7 @@ import io.github.joao_tinelli.libraryapi.service.AutorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -29,6 +30,7 @@ public class AutorController implements GenericController {
     private final AutorMapper mapper;
 
     @PostMapping // Metodo: POST
+    @PreAuthorize("hasAnyRole('GERENTE')")
     public ResponseEntity<Void> salvar(@RequestBody @Valid AutorDTO dto) throws RegistroDuplicadoException { // @RequestBody: essa annotation indica que esse objeto (dto) vai vir no body
 
         Autor autorEntidade = mapper.toEntity(dto); // <---
@@ -43,6 +45,7 @@ public class AutorController implements GenericController {
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyRole('GERENTE', 'OPERADOR')")
     public ResponseEntity<AutorDTO> obterDetalhes(@PathVariable("id") String id){
         var idAutor = UUID.fromString(id);
         Optional<Autor> autorOptional = service.obterPorId(idAutor);
@@ -58,6 +61,7 @@ public class AutorController implements GenericController {
 
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasAnyRole('GERENTE')")
     public ResponseEntity<ErroResposta> excluir(@PathVariable("id") String id) throws OperacaoNaoPermitidaException {
 
         var idAutor = UUID.fromString(id);
@@ -73,6 +77,7 @@ public class AutorController implements GenericController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('GERENTE', 'OPERADOR')")
     public ResponseEntity<List<AutorDTO>> pesquisar(
             @RequestParam(value = "nome", required = false) String nome,
             @RequestParam(value = "nacionalidade", required = false) String nacionalidade){
@@ -91,6 +96,7 @@ public class AutorController implements GenericController {
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasAnyRole('GERENTE')")
     public ResponseEntity<Void> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) throws RegistroDuplicadoException {
 
         var idAutor = UUID.fromString(id);
