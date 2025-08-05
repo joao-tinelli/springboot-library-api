@@ -9,7 +9,13 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      #ddl-auto: none
       ddl-auto: none
     properties:
-      hibernate.format_sql: true # para aparecer o formato sql no console
+      hibernate.format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
