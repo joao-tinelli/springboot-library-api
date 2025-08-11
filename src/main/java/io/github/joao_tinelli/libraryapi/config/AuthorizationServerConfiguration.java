@@ -21,6 +21,9 @@ import org.springframework.security.oauth2.server.authorization.settings.OAuth2T
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
@@ -32,68 +35,86 @@ import java.util.UUID;
 @EnableWebSecurity
 public class AuthorizationServerConfiguration {
 
+    // Arquivo para persistir a chave
+    private static final String KEY_FILE = "rsa-keypair.ser";
+
     @Bean
     @Order(1)
-    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .oidc(Customizer.withDefaults());
 
-        http.oauth2ResourceServer((oauth2Rs -> oauth2Rs.jwt(Customizer.withDefaults())));
+        http.oauth2ResourceServer(oauth2Rs -> oauth2Rs.jwt(Customizer.withDefaults()));
 
-        http.formLogin(configurer -> configurer.loginPage("/login"));
+        //http.formLogin(configurer -> configurer.loginPage("/login"));
 
         return http.build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
 
     @Bean
-    public TokenSettings tokenSettings(){
+    public TokenSettings tokenSettings() {
         return TokenSettings.builder()
-                // 1. Formato do Token
-                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                // 2. Tempo de Vida do Token
-                .accessTokenTimeToLive(Duration.ofMinutes(60))
+                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED) // JWT
+                .accessTokenTimeToLive(Duration.ofMinutes(60)) // 1 hora
                 .build();
     }
 
     @Bean
-    public ClientSettings clientSettings(){
+    public ClientSettings clientSettings() {
         return ClientSettings.builder()
-                // 3. Tela de Consentimento
-                .requireAuthorizationConsent(false)
+                .requireAuthorizationConsent(false) // sem tela de consentimento
                 .build();
     }
 
     // JWK - JSON Web Key
     @Bean
     public JWKSource<SecurityContext> jwkSource() throws Exception {
-        RSAKey rsaKey = gerarChaveRSA();
-        JWKSet jwkSet = new JWKSet();
+        RSAKey rsaKey = loadOrGenerateRSAKey();
+        JWKSet jwkSet = new JWKSet(rsaKey); // ✅ adiciona chave ao set
         return new ImmutableJWKSet<>(jwkSet);
     }
 
-    // Gerar par de chaves RSA
-    private RSAKey gerarChaveRSA() throws Exception {
+    // Carrega chave do disco ou gera nova
+    private RSAKey loadOrGenerateRSAKey() throws Exception {
+        File keyFile = new File(KEY_FILE);
+
+        if (keyFile.exists()) {
+            try (FileInputStream fis = new FileInputStream(keyFile)) {
+                byte[] data = fis.readAllBytes();
+                return RSAKey.parse(new String(data));
+            }
+        } else {
+            RSAKey rsaKey = generateRSAKey();
+            try (FileOutputStream fos = new FileOutputStream(keyFile)) {
+                fos.write(rsaKey.toJSONString().getBytes());
+            }
+            return rsaKey;
+        }
+    }
+
+    // Gera par de chaves RSA
+    private RSAKey generateRSAKey() throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-        RSAPublicKey chavePublica = (RSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey chavePrivada = (RSAPrivateKey) keyPair.getPrivate();
+        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
+        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
 
-        return new RSAKey.Builder(chavePublica)
-                .privateKey(chavePrivada)
+        return new RSAKey.Builder(publicKey)
+                .privateKey(privateKey)
                 .keyID(UUID.randomUUID().toString())
                 .build();
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource){
+    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 }
