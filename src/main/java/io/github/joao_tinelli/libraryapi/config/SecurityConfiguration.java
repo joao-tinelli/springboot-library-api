@@ -1,5 +1,6 @@
 package io.github.joao_tinelli.libraryapi.config;
 
+import io.github.joao_tinelli.libraryapi.security.JwtCustomAuthenticationFilter;
 import io.github.joao_tinelli.libraryapi.security.LoginSocialSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -20,7 +22,7 @@ public class SecurityConfiguration {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, LoginSocialSuccessHandler successHandler) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, LoginSocialSuccessHandler successHandler, JwtCustomAuthenticationFilter jwtCustomAuthenticationFilter) throws Exception {
         return http
                 // 1. Desativa CSRF (para APIs REST)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -51,6 +53,9 @@ public class SecurityConfiguration {
                 .oauth2ResourceServer(oauth2RS -> oauth2RS
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
+
+                // 7. Filtro para converter JwtToken em CustomAuthentication
+                .addFilterAfter(jwtCustomAuthenticationFilter, BearerTokenAuthenticationFilter.class)
 
                 .build();
     }
