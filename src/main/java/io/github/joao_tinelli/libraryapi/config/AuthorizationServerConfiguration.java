@@ -16,10 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,9 +47,13 @@ public class AuthorizationServerConfiguration {
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .oidc(Customizer.withDefaults());
 
-        http.oauth2ResourceServer(oauth2Rs -> oauth2Rs.jwt(Customizer.withDefaults()));
+        // Redireciona para a página de login quando um usuário não autenticado
+        // tenta acessar qualquer endpoint do servidor de autorização.
+        http.exceptionHandling(exceptions ->
+                exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+        );
 
-        //http.formLogin(configurer -> configurer.loginPage("/login"));
+        http.oauth2ResourceServer(oauth2Rs -> oauth2Rs.jwt(Customizer.withDefaults()));
 
         return http.build();
     }
@@ -61,7 +67,8 @@ public class AuthorizationServerConfiguration {
     public TokenSettings tokenSettings() {
         return TokenSettings.builder()
                 .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED) // JWT
-                .accessTokenTimeToLive(Duration.ofMinutes(60)) // 1 hora
+                .accessTokenTimeToLive(Duration.ofMinutes(60)) // access token: 1 hora
+                .refreshTokenTimeToLive(Duration.ofMinutes(90)) // refresh token (para renovar o access token)
                 .build();
     }
 
@@ -116,5 +123,21 @@ public class AuthorizationServerConfiguration {
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+    }
+
+    @Bean
+    public AuthorizationServerSettings authorizationServerSettings(){
+        return AuthorizationServerSettings.builder()
+                // obter token
+                .tokenEndpoint("/oauth2/token")
+                // obter informacoes do token
+                .tokenIntrospectionEndpoint("/oauth2/instrospect")
+                // para renovar o token
+                .tokenRevocationEndpoint("/oauth2/revoke")
+                // autenticacao
+                .authorizationEndpoint("/oauth2/authorize")
+                // inf do usuario OPEN ID CONNECT
+                .oidcUserInfoEndpoint("/oauth2/userinfo")
+                .build();
     }
 }
