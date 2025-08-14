@@ -10,6 +10,10 @@ import io.github.joao_tinelli.libraryapi.model.Livro;
 import io.github.joao_tinelli.libraryapi.model.Usuario;
 import io.github.joao_tinelli.libraryapi.service.LivroService;
 import io.github.joao_tinelli.libraryapi.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +29,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("livros")
 @RequiredArgsConstructor
+@Tag(name = "Books")
 public class LivroController implements GenericController{
     private final LivroService service;
     private final LivroMapper mapper;
@@ -32,6 +37,12 @@ public class LivroController implements GenericController{
 
     @PostMapping
     @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
+    @Operation(summary = "Save", description = "Register a new book")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Registered with success."),
+            @ApiResponse(responseCode = "422", description = "Validation error."),
+            @ApiResponse(responseCode = "409", description = "Book already registered.")
+    })
     public ResponseEntity<Void> salvar(@RequestBody @Valid CadastroLivroDTO dto, Authentication authentication) throws RegistroDuplicadoException {
         // mapear DTO para entidade
         Livro livro = mapper.toEntity(dto);
@@ -52,6 +63,11 @@ public class LivroController implements GenericController{
 
     @GetMapping("{id}")
     @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
+    @Operation(summary = "Get details", description = "Get a book's details")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Book found."),
+            @ApiResponse(responseCode = "404", description = "Book not found.")
+    })
     public ResponseEntity<ResultadoPesquisaLivroDTO> obterDetalhes(@PathVariable("id") String id){
         return service.obterPorId(UUID.fromString(id))
                 .map(livro -> {
@@ -62,6 +78,11 @@ public class LivroController implements GenericController{
 
     @DeleteMapping("{id}")
     @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
+    @Operation(summary = "Delete", description = "Delete a book.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Deleted with success."),
+            @ApiResponse(responseCode = "404", description = "Book not found.")
+    })
     public ResponseEntity<ErroResposta> excluir(@PathVariable("id") String id){
         var idLivro = UUID.fromString(id);
         Optional<Livro> livroOptional = service.obterPorId(idLivro);
@@ -76,6 +97,10 @@ public class LivroController implements GenericController{
 
     @GetMapping
     @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
+    @Operation(summary = "Search books", description = "Search for books using filters.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Book(s) found.")
+    })
     public ResponseEntity<Page<ResultadoPesquisaLivroDTO>> pesquisa(
             @RequestParam(value = "isbn", required = false) String isbn,
             @RequestParam(value = "titulo", required = false) String titulo,
@@ -94,6 +119,12 @@ public class LivroController implements GenericController{
 
     @PutMapping("{id}")
     @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
+    @Operation(summary = "Update", description = "Update a book.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Updated with success."),
+            @ApiResponse(responseCode = "422", description = "Validation error."),
+            @ApiResponse(responseCode = "409", description = "Book already registered.")
+    })
     public ResponseEntity<?> atualizar(@PathVariable("id") String id, @RequestBody @Valid CadastroLivroDTO dto){
         return service.obterPorId(UUID.fromString(id))
                 .map(livro -> {

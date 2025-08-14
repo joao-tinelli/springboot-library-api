@@ -28,34 +28,31 @@ public class SecurityConfiguration {
                 // 1. Desativa CSRF (para APIs REST)
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // 2. HTTP Basic Auth (útil para testes em ferramentas como Postman)
-                .httpBasic(Customizer.withDefaults())
-
-                // 3. Login por formulário
+                // 2. Login por formulário
                 .formLogin(configurer -> configurer
                         .loginPage("/login")
                         .permitAll()
                 )
 
-                // 4. Autorização de rotas
+                // 3. Autorização de rotas
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login/**").permitAll()
                         .requestMatchers("/usuarios/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
-                // 5. Login social (Google, GitHub etc.)
+                // 4. Login social (Google, GitHub etc.)
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
                         .successHandler(successHandler)
                 )
 
-                // 6. Resource Server (JWT)
+                // 5. Resource Server (JWT)
                 .oauth2ResourceServer(oauth2RS -> oauth2RS
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
 
-                // 7. Filtro para converter JwtToken em CustomAuthentication
+                // 6. Filtro para converter JwtToken em CustomAuthentication
                 .addFilterAfter(jwtCustomAuthenticationFilter, BearerTokenAuthenticationFilter.class)
 
                 .build();
