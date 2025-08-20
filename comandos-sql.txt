@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 # Criando a tabela autor
 create table autor(
     id uuid not null primary key,

@@ -7,6 +7,10 @@ docker run --name librarydb -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGR
 # Rodar container pgadmin4 na ultima versao e adiciona-lo na rede network-library
 docker run --name pgadmin4 -p 15432:80 -e PGADMIN_DEFAULT_EMAIL=admin@admin.com -e PGADMIN_DEFAULT_PASSWORD=admin --network library-network dpage/pgadmin4
 
+# Rodar container Postgres de producao na versao 16.3 e adiciona-lo na rede network-library
+docker run --name librarydb-prod -p 5433:5432 -d -e POSTGRES_PASSWORD=postgresprod -e POSTGRES_USER=postgresprod -e POSTGRES_DB=library --network library-network postgres:16.3
+
 # Reiniciar containers (apos desligar a maquina)
 docker start pgadmin4
 docker start librarydb
+dockert start librarydb-prod
