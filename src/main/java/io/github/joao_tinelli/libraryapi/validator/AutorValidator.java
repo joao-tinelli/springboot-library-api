@@ -3,18 +3,15 @@ package io.github.joao_tinelli.libraryapi.validator;
 import io.github.joao_tinelli.libraryapi.exception.RegistroDuplicadoException;
 import io.github.joao_tinelli.libraryapi.model.Autor;
 import io.github.joao_tinelli.libraryapi.repository.AutorRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component // para que seja gerenciado pelo Spring e para que o spring consiga injetá-lo na camada de serviço
+@Component
+@RequiredArgsConstructor
 public class AutorValidator {
-    private AutorRepository autorRepository;
-
-    // Injecao de dependencia
-    public AutorValidator(AutorRepository autorRepository) {
-        this.autorRepository = autorRepository;
-    }
+    private final AutorRepository autorRepository;
 
     public void validar(Autor autor) throws RegistroDuplicadoException {
         if (existeAutorCadastrado(autor)){

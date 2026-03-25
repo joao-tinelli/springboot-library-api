@@ -10,6 +10,7 @@ import io.github.joao_tinelli.libraryapi.repository.specs.LivroSpecs;
 import io.github.joao_tinelli.libraryapi.validator.LivroValidator;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LivroService {
     private final LivroRepository livroRepository;
     private final LivroValidator validator;
@@ -29,6 +31,7 @@ public class LivroService {
     @Transactional
     public Livro salvar(Livro livro) throws RegistroDuplicadoException {
         validator.validar(livro);
+        log.info("Salvando livro: isbn={}, titulo={}", livro.getIsbn(), livro.getTitulo());
         return livroRepository.save(livro);
     }
 
@@ -38,6 +41,7 @@ public class LivroService {
 
     @Transactional
     public void deletar(Livro livro) {
+        log.info("Deletando livro: id={}", livro.getId());
         livroRepository.delete(livro);
     }
 
@@ -76,6 +80,7 @@ public class LivroService {
             throw new IllegalArgumentException("Livro nao encontrado");
         }
         validator.validar(livro);
+        log.info("Atualizando livro: id={}", livro.getId());
         livroRepository.save(livro);
     }
 }

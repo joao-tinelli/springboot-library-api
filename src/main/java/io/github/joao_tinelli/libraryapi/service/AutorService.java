@@ -8,8 +8,12 @@ import io.github.joao_tinelli.libraryapi.repository.LivroRepository;
 import io.github.joao_tinelli.libraryapi.validator.AutorValidator;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +21,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor // evita a necessidade de inserir um construtor (em tempo de compilacao, o lombok vai adicionar o construtor para mim)
+@RequiredArgsConstructor
+@Slf4j
 public class AutorService {
     private final AutorRepository repository;
     private final AutorValidator validator;
@@ -25,7 +30,8 @@ public class AutorService {
 
     @Transactional
     public Autor salvar(Autor autor) throws RegistroDuplicadoException {
-        validator.validar(autor); // <------
+        validator.validar(autor);
+        log.info("Salvando autor: {}", autor.getNome());
         return repository.save(autor);
     }
 
@@ -34,7 +40,8 @@ public class AutorService {
         if (autor.getId() == null){
             throw new IllegalArgumentException("Autor nao encontrado");
         }
-        validator.validar(autor); // <------
+        validator.validar(autor);
+        log.info("Atualizando autor: id={}", autor.getId());
         repository.save(autor);
     }
 
@@ -45,6 +52,7 @@ public class AutorService {
         if (possuiLivro(autor)){
             throw new OperacaoNaoPermitidaException("Não é permitido excluir um autor que possui livros cadastrados!");
         }
+        log.info("Deletando autor: id={}", autor.getId());
         repository.delete(autor);
     }
 
@@ -64,17 +72,18 @@ public class AutorService {
         return repository.findAll();
     }
 
-    public List<Autor> pesquisaByExample(String nome, String nacionalidade){
+    public Page<Autor> pesquisaByExample(String nome, String nacionalidade, Integer pagina, Integer tamanhoPagina){
         var autor = new Autor();
         autor.setNome(nome);
         autor.setNacionalidade(nacionalidade);
 
         ExampleMatcher matcher = ExampleMatcher.matching()
-                .withIgnoreCase().
-                withIgnoreNullValues().
-                withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+                .withIgnoreCase()
+                .withIgnoreNullValues()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example<Autor> autorExample = Example.of(autor, matcher);
-        return repository.findAll(autorExample);
+        Pageable pageRequest = PageRequest.of(pagina, tamanhoPagina);
+        return repository.findAll(autorExample, pageRequest);
     }
 
     public boolean possuiLivro(Autor autor){
