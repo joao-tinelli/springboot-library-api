@@ -125,28 +125,25 @@ public class LivroController implements GenericController{
             @ApiResponse(responseCode = "422", description = "Validation error."),
             @ApiResponse(responseCode = "409", description = "Book already registered.")
     })
-    public ResponseEntity<?> atualizar(@PathVariable("id") String id, @RequestBody @Valid CadastroLivroDTO dto){
-        return service.obterPorId(UUID.fromString(id))
-                .map(livro -> {
-                    Livro entidadeAux = mapper.toEntity(dto);
+    public ResponseEntity<?> atualizar(@PathVariable("id") String id, @RequestBody @Valid CadastroLivroDTO dto) throws RegistroDuplicadoException {
+        var livroOptional = service.obterPorId(UUID.fromString(id));
 
-                    livro.setDataPublicacao(entidadeAux.getDataPublicacao());
-                    livro.setIsbn(entidadeAux.getIsbn());
-                    livro.setPreco(entidadeAux.getPreco());
-                    livro.setGenero(entidadeAux.getGenero());
-                    livro.setAutor(entidadeAux.getAutor());
-                    livro.setTitulo(entidadeAux.getTitulo());
+        if (livroOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-                    try {
-                        service.atualizar(livro);
-                    } catch (RegistroDuplicadoException e) {
-                        throw new RuntimeException(e);
-                    }
+        var livro = livroOptional.get();
+        Livro entidadeAux = mapper.toEntity(dto);
 
-                    // Isso retorna ResponseEntity<Void>, que é compatível com ResponseEntity<?>
-                    return ResponseEntity.noContent().build();
+        livro.setDataPublicacao(entidadeAux.getDataPublicacao());
+        livro.setIsbn(entidadeAux.getIsbn());
+        livro.setPreco(entidadeAux.getPreco());
+        livro.setGenero(entidadeAux.getGenero());
+        livro.setAutor(entidadeAux.getAutor());
+        livro.setTitulo(entidadeAux.getTitulo());
 
-                    // O .build() aqui retorna ResponseEntity<Object>, que agora é compatível com a assinatura ResponseEntity<?>
-                }).orElseGet(() -> ResponseEntity.notFound().build());
+        service.atualizar(livro);
+
+        return ResponseEntity.noContent().build();
     }
 }

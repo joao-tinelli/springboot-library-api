@@ -6,6 +6,7 @@ import io.github.joao_tinelli.libraryapi.model.Autor;
 import io.github.joao_tinelli.libraryapi.repository.AutorRepository;
 import io.github.joao_tinelli.libraryapi.repository.LivroRepository;
 import io.github.joao_tinelli.libraryapi.validator.AutorValidator;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -22,11 +23,13 @@ public class AutorService {
     private final AutorValidator validator;
     private final LivroRepository livroRepository;
 
+    @Transactional
     public Autor salvar(Autor autor) throws RegistroDuplicadoException {
         validator.validar(autor); // <------
         return repository.save(autor);
     }
 
+    @Transactional
     public void atualizar(Autor autor) throws RegistroDuplicadoException {
         if (autor.getId() == null){
             throw new IllegalArgumentException("Autor nao encontrado");
@@ -37,6 +40,7 @@ public class AutorService {
 
     public Optional<Autor> obterPorId(UUID id){ return repository.findById(id); }
 
+    @Transactional
     public void deletar(Autor autor) throws OperacaoNaoPermitidaException {
         if (possuiLivro(autor)){
             throw new OperacaoNaoPermitidaException("Não é permitido excluir um autor que possui livros cadastrados!");

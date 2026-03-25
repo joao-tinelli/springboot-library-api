@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component // para que seja gerenciado pelo Spring e para que eu consiga injetá-lo na camada de serviço
+@Component // para que seja gerenciado pelo Spring e para que o spring consiga injetá-lo na camada de serviço
 public class AutorValidator {
     private AutorRepository autorRepository;
 
@@ -31,7 +31,9 @@ public class AutorValidator {
         if (autor.getId() == null){
             return autorEncontrado.isPresent();
         }
-        return !autor.getId().equals(autorEncontrado.get().getId()) && autorEncontrado.isPresent();
+        return autorEncontrado
+                .map(a -> !a.getId().equals(autor.getId()))
+                .orElse(false);
     }
 
 }
