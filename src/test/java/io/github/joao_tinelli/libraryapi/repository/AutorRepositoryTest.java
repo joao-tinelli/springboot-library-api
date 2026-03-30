@@ -1,119 +1,131 @@
 package io.github.joao_tinelli.libraryapi.repository;
 
 import io.github.joao_tinelli.libraryapi.model.Autor;
-import io.github.joao_tinelli.libraryapi.model.GeneroLivro;
-import io.github.joao_tinelli.libraryapi.model.Livro;
-import lombok.ToString;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-@SpringBootTest
-@ToString
-public class AutorRepositoryTest{
+import static org.junit.jupiter.api.Assertions.*;
+
+@DataJpaTest
+class AutorRepositoryTest {
 
     @Autowired
     AutorRepository repository;
 
-    @Autowired
-    LivroRepository livroRepository;
+    Autor autor;
 
-    @Test
-    public void salvarTest(){
-        Autor autor = new Autor();
-        autor.setNome("Pedro Henrique");
+    @BeforeEach
+    void setUp() {
+        autor = new Autor();
+        autor.setNome("Joao");
         autor.setNacionalidade("Brasil");
-        autor.setDataNascimento(LocalDate.of(2008,8,24));
-
-        var autorSalvo = repository.save(autor);
-        System.out.println("Autor salvo: " + autorSalvo);
+        autor.setDataNascimento(LocalDate.parse("1990-01-01"));
     }
 
     @Test
-    public void atualizarTest(){
-        var id = UUID.fromString("7ffbcaf5-f2cc-4e87-8ddc-e30b4de53e6b");
-        Optional<Autor> possivelAutor = repository.findById(id);
-        if(possivelAutor.isPresent()){
+    @DisplayName("Teste de salvar autor")
+    void deveSalvarAutor(){
+        // Arrange
 
-            Autor autorEncontrado = possivelAutor.get();
-            System.out.println("Dados do autor: ");
-            System.out.println(possivelAutor.get());
+        // Act
+        Autor autorSalvo = repository.save(autor);
 
-            autorEncontrado.setDataNascimento(LocalDate.of(1960, 1, 29));
-            repository.save(autorEncontrado);
-
-        }
+        // Assert
+        assertNotNull(autorSalvo);
+        assertNotNull(autorSalvo.getId());
+        assertEquals("Joao", autorSalvo.getNome());
     }
 
     @Test
-    public void listarTest(){
-        List<Autor> lista = repository.findAll();
-        lista.forEach(System.out::println);
-    }
-
-    @Test
-    public void countTest(){
-        System.out.println("Contagem de autores: " + repository.count());
-    }
-
-    @Test
-    public void deletePorIdTest(){
-        var id = UUID.fromString("7ffbcaf5-f2cc-4e87-8ddc-e30b4de53e6b");
-        repository.deleteById(id);
-    }
-
-    @Test
-    public void deletePorObjetoTest(){
-        var id = UUID.fromString("66d00236-806c-49e5-ba72-5e59c23e6411");
-        var maria = repository.findById(id).get();
-        repository.delete(maria);
-
-    }
-
-    @Test
-    public void salvarAutorComLivrosTest(){
-        Autor autor = new Autor();
-        autor.setNome("Marcos");
-        autor.setNacionalidade("Brasil");
-        autor.setDataNascimento(LocalDate.of(1969,5,18));
-
-        Livro livro = new Livro();
-        livro.setIsbn("1234567");
-        livro.setPreco(BigDecimal.valueOf(75));
-        livro.setGenero(GeneroLivro.FICCAO);
-        livro.setTitulo("O Monge e o Executivo");
-        livro.setDataPublicacao(LocalDate.of(2000, 1, 30));
-        livro.setAutor(autor);
-
-        autor.setLivros(new ArrayList<>());
-        autor.getLivros().add(livro);
-
+    @DisplayName("Teste de encontrar o autor por nome")
+    void findByNome() {
+        // Arrange
         repository.save(autor);
-        // livroRepository.saveAll(autor.getLivros()); Com cascade, nao preciso salvar os livros manualmente
-        // POREM, sempre que eu excluir um autor, todos os seus livros tbm serao excluidos!
+
+        // Act
+        List<Autor> autores = repository.findByNome("Joao");
+
+        // Assert
+        assertFalse(autores.isEmpty());
+        assertEquals("Joao", autores.get(0).getNome());
     }
 
     @Test
-    @Transactional // <-- ESSENCIAL para manter a sessão aberta e evitar LazyInitializationException
-    public void listarLivrosAutorCorretamente(){
-        var id = UUID.fromString("d9c0ee48-8f66-434e-8679-a14595aaf1ea");
+    @DisplayName("Teste de encontrar o autor por nacionalidade")
+    void findByNacionalidade() {
+        // Arrange
+        repository.save(autor);
 
-        // 1. Busca o autor
-        Autor autor = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Autor não encontrado para o ID: " + id));
+        // Act
+        List<Autor> autores = repository.findByNacionalidade("Brasil");
 
-        // 2. Apenas acesse a lista.
-        // Dentro de uma transação, o Hibernate buscará os livros do banco de dados
-        // automaticamente neste momento. Não é preciso chamar livroRepository.
-        System.out.println("Listando livros para o autor: " + autor.getNome());
-        autor.getLivros().forEach(System.out::println);
+        // Assert
+        assertNotNull(autores);
+        assertEquals("Brasil", autores.get(0).getNacionalidade());
+    }
+
+    @Test
+    @DisplayName("Teste de encontrar o autor por nome e nacionalidade")
+    void findByNomeAndNacionalidade() {
+        // Arrange
+        repository.save(autor);
+
+        // Act
+        List <Autor> autores = repository.findByNomeAndNacionalidade("Joao", "Brasil");
+
+        // Assert
+        assertNotNull(autores);
+        assertEquals("Joao", autores.get(0).getNome());
+        assertEquals("Brasil", autores.get(0).getNacionalidade());
+    }
+
+    @Test
+    @DisplayName("Teste de encontrar o autor por nome, nacionalidade e data de nascimento")
+    void findByNomeAndDataNascimentoAndNacionalidade() {
+        // Arrange
+        repository.save(autor);
+
+        // Act
+        Optional<Autor> optAutor = repository.findByNomeAndDataNascimentoAndNacionalidade("Joao", autor.getDataNascimento(), "Brasil");
+
+        // Assert
+        assertTrue(optAutor.isPresent());
+
+        Autor autorEncontrado = optAutor.get();
+
+        assertEquals("Joao", autorEncontrado.getNome());
+        assertEquals("Brasil", autorEncontrado.getNacionalidade());
+        assertEquals(LocalDate.parse("1990-01-01"), autorEncontrado.getDataNascimento());
+    }
+
+    @Test
+    @DisplayName("Nao deve encontrar autor com dados inexistentes")
+    void naoDeveEncontrarAutor(){
+        // Arrange
+        repository.save(autor);
+
+        // Act
+        Optional<Autor> resultado = repository.findByNomeAndDataNascimentoAndNacionalidade("Ana", LocalDate.of(1990, 01, 01), "Argentina");
+
+        // Assert
+        assertTrue(resultado.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Deve persistir autor no banco")
+    void devePersistirAutor(){
+        // Act
+        Autor salvo = repository.save(autor);
+
+        Optional<Autor> encontrado = repository.findById(salvo.getId());
+
+        assertTrue(encontrado.isPresent());
     }
 }
