@@ -2,6 +2,7 @@ package io.github.joao_tinelli.libraryapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.joao_tinelli.libraryapi.config.SecurityConfiguration;
+import io.github.joao_tinelli.libraryapi.config.TestSecurityConfig;
 import io.github.joao_tinelli.libraryapi.config.WebConfiguration;
 import io.github.joao_tinelli.libraryapi.controller.dto.AutorDTO;
 import io.github.joao_tinelli.libraryapi.controller.mappers.AutorMapper;

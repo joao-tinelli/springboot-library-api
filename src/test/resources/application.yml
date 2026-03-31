@@ -1,15 +1,15 @@
-# src/test/resources/application.yml
+server:
+  port: 8888
 
 spring:
   application:
     name: libraryapi
 
-  # Banco em memória — sem depender de PostgreSQL rodando
   datasource:
-    url: jdbc:h2:mem:librarydb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/library}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
 
   # H2 precisa do dialeto explícito; Hibernate cria e derruba o schema a cada teste
   jpa:
@@ -18,7 +18,6 @@ spring:
       ddl-auto: create-drop
     properties:
       hibernate.format_sql: true
-      hibernate.dialect: org.hibernate.dialect.H2Dialect
 
   # OAuth2 desabilitado nos testes:
   # - @WebMvcTest usa @WithMockUser ou SecurityMockMvcConfigurer

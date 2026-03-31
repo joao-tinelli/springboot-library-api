@@ -44,8 +44,8 @@ import java.util.UUID;
 @EnableWebSecurity
 public class AuthorizationServerConfiguration {
 
-    // Arquivo para persistir a chave
-    private static final String KEY_FILE = "rsa-keypair.ser";
+    @org.springframework.beans.factory.annotation.Value("${jwt.jwk.key-json:}")
+    private String jwkKeyJson;
 
     @Bean
     @Order(1)
@@ -94,9 +94,15 @@ public class AuthorizationServerConfiguration {
         return new ImmutableJWKSet<>(jwkSet);
     }
 
-    // Carrega chave do disco ou gera nova
+    // Carrega chave de variável de ambiente, do disco, ou gera nova
     private RSAKey loadOrGenerateRSAKey() throws Exception {
-        File keyFile = new File(KEY_FILE);
+        // 1. Tenta carregar da variável de ambiente primeiro (Ideal para Produção / Docker)
+        if (jwkKeyJson != null && !jwkKeyJson.isBlank()) {
+            return RSAKey.parse(jwkKeyJson);
+        }
+
+        // 2. Tenta carregar do arquivo local (Útil para Desenvolvimento)
+        File keyFile = new File("rsa-keypair.ser");
 
         if (keyFile.exists()) {
             try (FileInputStream fis = new FileInputStream(keyFile)) {
@@ -104,6 +110,7 @@ public class AuthorizationServerConfiguration {
                 return RSAKey.parse(new String(data));
             }
         } else {
+            // 3. Se não existir em nenhum lugar, gera uma nova e salva no arquivo local
             RSAKey rsaKey = generateRSAKey();
             try (FileOutputStream fos = new FileOutputStream(keyFile)) {
                 fos.write(rsaKey.toJSONString().getBytes());
