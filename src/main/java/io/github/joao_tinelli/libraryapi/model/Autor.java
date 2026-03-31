@@ -55,9 +55,4 @@ public class Autor {
     // id_usuario uuid
     @Column(name = "id_usuario")
     private UUID idUsuario;
-
-    @Deprecated
-    public Autor(){
-        // para uso do framework
-    }
 }

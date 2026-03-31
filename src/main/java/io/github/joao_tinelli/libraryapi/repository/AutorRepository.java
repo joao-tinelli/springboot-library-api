@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// Injecao no container ja eh automatica
 public interface AutorRepository extends JpaRepository<Autor, UUID> {
     List<Autor> findByNome(String nome);
     List<Autor> findByNacionalidade(String nacionalidade);

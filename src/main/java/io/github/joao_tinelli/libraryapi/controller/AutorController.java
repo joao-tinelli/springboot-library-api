@@ -42,6 +42,7 @@ public class AutorController implements GenericController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Registered with success."),
             @ApiResponse(responseCode = "422", description = "Validation error."),
+            @ApiResponse(responseCode = "403", description = "User has no permission."),
             @ApiResponse(responseCode = "409", description = "Author already registered.")
     })
     public ResponseEntity<Void> salvar(@RequestBody @Valid AutorDTO dto, Authentication authentication) throws RegistroDuplicadoException { // @RequestBody: essa annotation indica que esse objeto (dto) vai vir no body
@@ -74,7 +75,7 @@ public class AutorController implements GenericController {
 
         if (autorOptional.isPresent()){
             Autor autor = autorOptional.get();
-            AutorDTO dto = mapper.toDTO(autor); // <----
+            AutorDTO dto = mapper.toDTO(autor);
 
             return ResponseEntity.ok(dto);
         }
@@ -88,6 +89,7 @@ public class AutorController implements GenericController {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Deleted with success."),
             @ApiResponse(responseCode = "404", description = "Author not found."),
+            @ApiResponse(responseCode = "403", description = "User has no permission."),
             @ApiResponse(responseCode = "400", description = "Author has books registered.")
     })
     public ResponseEntity<ErroResposta> excluir(@PathVariable("id") String id) throws OperacaoNaoPermitidaException {
@@ -128,6 +130,8 @@ public class AutorController implements GenericController {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Updated with success."),
             @ApiResponse(responseCode = "422", description = "Validation error."),
+            @ApiResponse(responseCode = "404", description = "Author not found."),
+            @ApiResponse(responseCode = "403", description = "User has no permission."),
             @ApiResponse(responseCode = "409", description = "Author already registered.")
     })
     public ResponseEntity<Void> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) throws RegistroDuplicadoException {

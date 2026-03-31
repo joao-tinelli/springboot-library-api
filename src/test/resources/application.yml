@@ -1,0 +1,36 @@
+# src/test/resources/application.yml
+
+spring:
+  application:
+    name: libraryapi
+
+  # Banco em memória — sem depender de PostgreSQL rodando
+  datasource:
+    url: jdbc:h2:mem:librarydb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # H2 precisa do dialeto explícito; Hibernate cria e derruba o schema a cada teste
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.H2Dialect
+
+  # OAuth2 desabilitado nos testes:
+  # - @WebMvcTest usa @WithMockUser ou SecurityMockMvcConfigurer
+  # - variáveis GOOGLE_CLIENT_ID/SECRET não precisam existir no CI
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+
+# Springdoc — mantém igual ao principal
+springdoc:
+  override-with-generic-response: false
