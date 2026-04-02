@@ -14,6 +14,7 @@ import io.github.joao_tinelli.libraryapi.model.Usuario;
 
 import io.github.joao_tinelli.libraryapi.service.AutorService;
 import io.github.joao_tinelli.libraryapi.service.UsuarioService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
