@@ -24,6 +24,7 @@ This project is built with a modern and robust set of technologies:
 -   **ORM**: Spring Data JPA, Hibernate
 -   **API Documentation**: SpringDoc (OpenAPI 3)
 -   **Containerization**: Docker
+-   **Testing**: JUnit 5, Mockito, RestAssured, Testcontainers
 -   **Build Tool**: Maven
 -   **Utilities**: Lombok, MapStruct
 
@@ -103,6 +104,20 @@ The provided `Dockerfile` allows you to build a self-contained image of the appl
       library-api
     ```
     The application will now be running inside a Docker container and accessible at `http://localhost:8080`.
+
+---
+
+## 🧪 Running Tests
+
+This project includes a comprehensive suite of Unit and Integration Tests.
+
+To run all tests, including integration tests that utilize **Testcontainers** to spin up a real PostgreSQL database instance automatically:
+
+```bash
+mvn test
+```
+
+*Note: Ensure your Docker daemon is running before executing the tests, as Testcontainers requires it to start the database container.*
 
 ---
 
