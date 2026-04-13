@@ -33,6 +33,6 @@ springdoc:
 spring:
   config:
     activate:
-      on-profile: production
+      on-profile: default
   jpa: # Sobrescrevendo o perfil default
     show-sql: false

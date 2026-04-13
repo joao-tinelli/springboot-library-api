@@ -47,8 +47,16 @@ public class LivroController implements GenericController{
         // mapear DTO para entidade
         Livro livro = mapper.toEntity(dto);
 
-        UserDetails usuarioLogado = (UserDetails) authentication.getPrincipal();
-        Usuario usuario = usuarioService.obterPorLogin(usuarioLogado.getUsername());
+        Object principal = authentication.getPrincipal();
+        Usuario usuario;
+        
+        if (principal instanceof Usuario) {
+            usuario = (Usuario) principal;
+        } else if (principal instanceof UserDetails userDetails) {
+            usuario = usuarioService.obterPorLogin(userDetails.getUsername());
+        } else {
+            usuario = usuarioService.obterPorLogin(String.valueOf(authentication.getName()));
+        }
         livro.setIdUsuario(usuario.getId());
 
         // enviar a entidade para o service validar e salvar na base
