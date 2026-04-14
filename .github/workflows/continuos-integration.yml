@@ -28,8 +28,9 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
     
     - name: Build Application e Docker Image (com Jib)
-      run: mvn jib:dockerBuild
-   
+      # O package força o maven a compilar classes, rodar os testes e gerar os binários 
+      run: mvn package jib:dockerBuild
+
     - name: Push to Container Registry
       run: |
         # Retag da imagem compilada pelo Jib para adicionar a versão única do github actions ($github.run_id) e latest
