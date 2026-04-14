@@ -9,8 +9,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import io.github.joao_tinelli.libraryapi.service.UsuarioService;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class SwaggerIntegrationTest extends AbstractIntegrationTest {
+
+    @MockitoBean
+    JwtDecoder jwtDecoder;
+
+    @MockitoBean
+    UsuarioService usuarioService;
 
     @Test
     @DisplayName("Deve retornar Swagger UI")
