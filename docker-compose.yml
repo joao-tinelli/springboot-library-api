@@ -1,0 +1,43 @@
+services:
+  librarydb:
+    image: postgres:16.3
+    container_name: librarydb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: library
+    ports:
+      - "5432:5432"
+    networks:
+      - library-network
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "15432:80"
+    networks:
+      - library-network
+    depends_on:
+      - librarydb
+
+  libraryapi:
+    image: joaotinelli/libraryapi:v2
+    container_name: libraryapi
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://librarydb:5432/library
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - library-network
+    depends_on:
+      - librarydb
+
+networks:
+  library-network:
+    external: true
