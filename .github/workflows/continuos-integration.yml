@@ -80,6 +80,6 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: libraryapi-service
+        service: libraryapi-task-definition-service-sagw3tow
         cluster: libraryapi-cluster
         wait-for-service-stability: true
