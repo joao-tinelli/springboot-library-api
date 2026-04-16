@@ -57,8 +57,8 @@ jobs:
         IMAGE_TAG: ${{ github.run_id }}
       run: |
         # Retag da imagem compilada pelo Jib para adicionar a versão única do github actions ($github.run_id) e latest
-        docker tag joaotinelli/libraryapi:v2 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker tag joaotinelli/libraryapi:v2 $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker tag joaotinelli/libraryapi:v3 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker tag joaotinelli/libraryapi:v3 $ECR_REGISTRY/$ECR_REPOSITORY:latest
         
         # O push final no ECR
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
