@@ -9,7 +9,7 @@ A comprehensive RESTful API for a bookstore management system, built with Java a
 -   **Role-Based Access Control**: Differentiated access levels for `USER` and `ADMIN` roles, protecting sensitive endpoints.
 -   **Database Management**: Modeled and managed a PostgreSQL database using **Spring Data JPA** and Hibernate for efficient data persistence.
 -   **API Documentation**: Integrated **SpringDoc (Swagger UI)** for clear, interactive, and auto-generated API documentation.
--   **Containerized Deployment**: Application is fully containerized using **Docker**, ensuring a consistent and isolated environment for deployment on platforms like **AWS**.
+-   **Containerized Deployment & CI/CD**: Application is fully containerized using **Docker** and automated via **GitHub Actions**. Every push to the main branch triggers a complete Continuous Integration and Continuous Deployment (CI/CD) pipeline that builds the image, pushes it to **Amazon ECR**, and performs a zero-downtime rolling update on an **AWS ECS Fargate** cluster connected to an **Amazon RDS** PostgreSQL database.
 
 ---
 
@@ -24,6 +24,8 @@ This project is built with a modern and robust set of technologies:
 -   **ORM**: Spring Data JPA, Hibernate
 -   **API Documentation**: SpringDoc (OpenAPI 3)
 -   **Containerization**: Docker
+-   **CI/CD Pipeline**: GitHub Actions
+-   **Cloud Infrastructure**: AWS (ECS Fargate, ECR, RDS)
 -   **Testing**: JUnit 5, Mockito, RestAssured, Testcontainers
 -   **Build Tool**: Maven
 -   **Utilities**: Lombok, MapStruct
