@@ -35,22 +35,31 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v4.1.0
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: sa-east-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
     
     - name: Build Application e Docker Image (com Jib)
       # O package força o maven a compilar classes, rodar os testes e gerar os binários 
       run: mvn package jib:dockerBuild
 
-    - name: Push to Container Registry
+    - name: Push to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: libraryapi-ecr
+        IMAGE_TAG: ${{ github.run_id }}
       run: |
         # Retag da imagem compilada pelo Jib para adicionar a versão única do github actions ($github.run_id) e latest
-        docker tag joaotinelli/libraryapi:v2 ${{ secrets.DOCKER_USERNAME }}/libraryapi:${{ github.run_id }}
-        docker tag joaotinelli/libraryapi:v2 ${{ secrets.DOCKER_USERNAME }}/libraryapi:latest
+        docker tag joaotinelli/libraryapi:v2 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker tag joaotinelli/libraryapi:v2 $ECR_REGISTRY/$ECR_REPOSITORY:latest
         
-        # O push final no Docker Hub
-        docker push ${{ secrets.DOCKER_USERNAME }}/libraryapi:${{ github.run_id }}
-        docker push ${{ secrets.DOCKER_USERNAME }}/libraryapi:latest
+        # O push final no ECR
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
